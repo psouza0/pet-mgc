@@ -48,7 +48,11 @@ def index():
             existing_pet = next((pet for pet in data if pet['Nome'] == nome), None)
             
             if existing_pet:
-                existing_pet['Horários'].append({"Horário": horario, "Glicemia": glicemia})
+                existing_pet['Horários'].append({
+                    "Data": request.form['data'],
+                    "Horário": horario,
+                    "Glicemia": glicemia
+                })
             else:
                 new_entry = {
                     "Nome": nome,
@@ -56,34 +60,60 @@ def index():
                     "Raça": request.form['raça'],
                     "Idade": request.form['idade'],
                     "Peso": request.form['peso'],
-                    "Horários": [{"Horário": horario, "Glicemia": glicemia}]
+                    "Horários": [{
+                        "Data": request.form['data'],
+                        "Horário": horario,
+                        "Glicemia": glicemia
+                    }]
                 }
                 data.append(new_entry)
             
             save_data(data)
             return redirect(url_for('index'))
-    
-    df = []
-    img_path = None
-    if data:
-        horarios = []
-        glicemias = []
-        for pet in data:
-            for entry in pet['Horários']:
-                horarios.append(entry['Horário'])
-                glicemias.append(entry['Glicemia'])
-        df = pd.DataFrame({'Horário': horarios, 'Glicemia': glicemias})
-        df = df.sort_values(by="Horário")
-        plt.figure()
-        plt.plot(df["Horário"], df["Glicemia"], marker='o', linestyle='-', color='b')
-        plt.xlabel("Horário")
-        plt.ylabel("Glicemia (mg/dL)")
-        plt.title("Curva Glicêmica")
-        plt.xticks(rotation=45)
-        plt.savefig(GRAPH_FILE)
-        img_path = GRAPH_FILE + "?v=" + str(datetime.now().timestamp())
-    
+
+    # **Correção: garantir que a página seja renderizada corretamente**
+    img_path = gerar_grafico(data)  # Chama a função para gerar o gráfico
     return render_template('index.html', data=data, img_path=img_path)
+
+    
+def gerar_grafico(data):
+    img_path = None  # Inicializa a variável para evitar erro se não houver dados
+
+    if data:
+        registros = []
+        
+        for pet in data:
+            for entry in pet.get('Horários', []):  # Usa .get() para evitar KeyError
+                registros.append({
+                    "Nome": pet["Nome"],
+                    "DataHora": f"{entry['Data']} {entry['Horário']}",
+                    "Data": entry["Data"],
+                    "Horário": entry["Horário"],
+                    "Glicemia": entry["Glicemia"]
+                })
+
+        if registros:
+            df = pd.DataFrame(registros)
+            df = df.sort_values(by=["Data", "Horário"])  # Ordenação correta
+
+            # Geração do gráfico
+            plt.figure(figsize=(10, 5))
+            plt.plot(df["DataHora"], df["Glicemia"], marker='o', linestyle='-', color='b')
+            plt.xlabel("Data e Horário")
+            plt.ylabel("Glicemia (mg/dL)")
+            plt.title("Curva Glicêmica")
+            plt.xticks(rotation=45, fontsize=8)
+            plt.grid(True)
+            plt.tight_layout()
+
+            # Salvando o gráfico
+            GRAPH_FILE = os.path.join("static", "grafico.png")
+            plt.savefig(GRAPH_FILE)
+            plt.close()  # Libera memória
+            
+            img_path = GRAPH_FILE + "?v=" + str(datetime.now().timestamp())
+
+    return img_path  # Retorna o caminho da imagem gerada
 
 @app.route('/get_pet/<nome>')
 def get_pet(nome):

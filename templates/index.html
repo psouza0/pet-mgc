@@ -70,6 +70,10 @@
                         </div>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Data da Medição:</label>
+                        <input type="date" class="form-control" name="data" id="data">
+                    </div>                    
+                    <div class="mb-3">
                         <label class="form-label">Horário da Medição:</label>
                         <div class="input-group">
                             <input type="time" class="form-control" name="horario" id="horario">
@@ -91,6 +95,7 @@
             <table class="table table-bordered">
                 <tr>
                     <th>Nome</th>
+                    <th>Data</th>
                     <th>Horário</th>
                     <th>Glicemia (mg/dL)</th>
                 </tr>
@@ -98,6 +103,7 @@
                 {% for entry in item['Horários'] %}
                 <tr>
                     <td>{{ item['Nome'] }}</td>
+                    <td>{{ item['Data'] }}</td>
                     <td>{{ entry['Horário'] }}</td>
                     <td>{{ entry['Glicemia'] }}</td>
                 </tr>
@@ -109,7 +115,7 @@
         <form method="post" action="/clear" class="text-center mt-4">
             <button type="submit" class="btn btn-danger">Limpar Histórico</button>
         </form>
-        
+
         {% endif %}
 
         
@@ -121,6 +127,18 @@
         {% endif %}
     </div>
 
+    <script>
+        function setCurrentDate() {
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById("data").value = today;
+        }
+    
+        // Define a data atual ao carregar a página
+        window.onload = function() {
+            setCurrentDate();
+        };
+    </script>
+    
     <script>
         function setCurrentTime() {
             let now = new Date();
