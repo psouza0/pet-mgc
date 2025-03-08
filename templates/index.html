@@ -15,17 +15,41 @@
 <body>
     <div class="container">
         <h1 class="text-center my-4">Monitoramento Glicêmico para Pets</h1>
-        
+
         <div class="card">
             <div class="card-body">
+                <h5 class="card-title">Importar ou Exportar Dados</h5>
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Importar Dados (JSON):</label>
+                        <input type="file" class="form-control" name="json_file" accept=".json">
+                        <button type="submit" class="btn btn-primary mt-2">Importar</button>
+                    </div>
+                </form>
+                <a href="/export" class="btn btn-warning w-100">Exportar Dados JSON</a>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">Adicionar Nova Medição</h5>
                 <form method="post">
                     <div class="mb-3">
+                        <label class="form-label">Selecionar Pet:</label>
+                        <select class="form-select" id="selectPet" onchange="fillPetData()">
+                            <option value="">Novo Pet</option>
+                            {% for item in data %}
+                            <option value="{{ item['Nome'] }}">{{ item['Nome'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Nome do Pet:</label>
-                        <input type="text" class="form-control" name="nome" required>
+                        <input type="text" class="form-control" name="nome" id="nome" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Tipo de Animal:</label>
-                        <select class="form-select" name="tipo">
+                        <select class="form-select" name="tipo" id="tipo">
                             <option value="Cachorro">Cachorro</option>
                             <option value="Gato">Gato</option>
                             <option value="Outro">Outro</option>
@@ -33,16 +57,16 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Raça:</label>
-                        <input type="text" class="form-control" name="raça">
+                        <input type="text" class="form-control" name="raça" id="raça">
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <label class="form-label">Idade (anos):</label>
-                            <input type="number" class="form-control" name="idade" min="0" step="1">
+                            <input type="number" class="form-control" name="idade" id="idade" min="0" step="1">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Peso (kg):</label>
-                            <input type="number" class="form-control" name="peso" min="0.1" step="0.1">
+                            <input type="number" class="form-control" name="peso" id="peso" min="0.1" step="0.1">
                         </div>
                     </div>
                     <div class="mb-3">
@@ -71,25 +95,29 @@
                     <th>Glicemia (mg/dL)</th>
                 </tr>
                 {% for item in data %}
+                {% for entry in item['Horários'] %}
                 <tr>
                     <td>{{ item['Nome'] }}</td>
-                    <td>{{ item['Horário'] }}</td>
-                    <td>{{ item['Glicemia'] }}</td>
+                    <td>{{ entry['Horário'] }}</td>
+                    <td>{{ entry['Glicemia'] }}</td>
                 </tr>
+                {% endfor %}
                 {% endfor %}
             </table>
         </div>
 
-        {% if img_path %}
-            <h2 class="text-center my-4">Curva Glicêmica</h2>
-            <div class="text-center">
-                <img src="{{ img_path }}" class="img-fluid" alt="Curva Glicêmica">
-            </div>
-        {% endif %}
-        
         <form method="post" action="/clear" class="text-center mt-4">
             <button type="submit" class="btn btn-danger">Limpar Histórico</button>
         </form>
+        
+        {% endif %}
+
+        
+        {% if img_path %}
+        <h2 class="text-center my-4">Curva Glicêmica</h2>
+        <div class="text-center">
+            <img src="{{ img_path }}?v={{ timestamp }}" class="img-fluid" alt="Curva Glicêmica">
+        </div>
         {% endif %}
     </div>
 
@@ -102,5 +130,32 @@
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function fillPetData() {
+            let selectedPet = document.getElementById("selectPet").value;
+            if (selectedPet) {
+                fetch(`/get_pet/${encodeURIComponent(selectedPet)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && Object.keys(data).length > 0) {
+                            document.getElementById("nome").value = data.Nome;
+                            document.getElementById("tipo").value = data.Tipo;
+                            document.getElementById("raça").value = data.Raça;
+                            document.getElementById("idade").value = data.Idade;
+                            document.getElementById("peso").value = data.Peso;
+                        }
+                    })
+                    .catch(error => console.error('Erro ao buscar dados do pet:', error));
+            } else {
+                // Limpa os campos para entrada manual de um novo pet
+                document.getElementById("nome").value = "";
+                document.getElementById("tipo").value = "Cachorro";
+                document.getElementById("raça").value = "";
+                document.getElementById("idade").value = "";
+                document.getElementById("peso").value = "";
+            }
+        }
+    </script>
+    
 </body>
 </html>
