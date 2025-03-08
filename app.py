@@ -134,9 +134,22 @@ def clear_data():
 def export_json():
     if data:
         pet_name = data[0]["Nome"].replace(" ", "_") if "Nome" in data[0] else "dados_pet"
-        file_name = f"{pet_name}.json"
+        file_name = f"{pet_name}_dados.json"
         return send_file(DATA_FILE, as_attachment=True, download_name=file_name)
     return redirect(url_for('index'))
+
+@app.route('/export_graph')
+def export_graph():
+    if data:
+        # Pega o nome do primeiro pet cadastrado
+        pet_name = data[0]["Nome"].replace(" ", "_") if "Nome" in data[0] else "grafico_glicemico"
+    else:
+        pet_name = "grafico_glicemico"
+
+    file_name = f"{pet_name}_grafico.png"
+
+    return send_file(GRAPH_FILE, as_attachment=True, download_name=file_name)
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
