@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoramento Glicêmico para Pets</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        form { margin: 20px auto; width: 50%; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; }
+        table { margin: 20px auto; width: 80%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #4CAF50; color: white; }
+        img { margin-top: 20px; max-width: 90%; }
+        .btn { padding: 5px 10px; margin-left: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Monitoramento Glicêmico para Pets</h1>
+
+    <form method="post">
+        <label>Nome do Pet:</label>
+        <input type="text" name="nome" required><br><br>
+
+        <label>Tipo de Animal:</label>
+        <select name="tipo">
+            <option value="Cachorro">Cachorro</option>
+            <option value="Gato">Gato</option>
+            <option value="Outro">Outro</option>
+        </select><br><br>
+
+        <label>Raça:</label>
+        <input type="text" name="raça"><br><br>
+
+        <label>Idade (anos):</label>
+        <input type="number" name="idade" min="0" step="1"><br><br>
+
+        <label>Peso (kg):</label>
+        <input type="number" name="peso" min="0.1" step="0.1"><br><br>
+
+        <label>Horário da Medição:</label>
+        <input type="time" name="horario" id="horario"><button type="button" class="btn" onclick="setCurrentTime()">Agora</button><br><br>
+
+        <label>Valor da Glicemia (mg/dL):</label>
+        <input type="number" name="glicemia" min="0" required><br><br>
+
+        <button type="submit">Adicionar Medição</button>
+    </form>
+
+    {% if data %}
+    <h2>Histórico de Glicemia</h2>
+    <table>
+        <tr>
+            <th>Nome</th>
+            <th>Horário</th>
+            <th>Glicemia (mg/dL)</th>
+        </tr>
+        {% for item in data %}
+        <tr>
+            <td>{{ item['Nome'] }}</td>
+            <td>{{ item['Horário'] }}</td>
+            <td>{{ item['Glicemia'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    {% if img_path %}
+        <h2>Curva Glicêmica</h2>
+        <img src="{{ img_path }}" alt="Curva Glicêmica">
+    {% endif %}
+    {% endif %}
+
+    <script>
+        function setCurrentTime() {
+            let now = new Date();
+            let hours = String(now.getHours()).padStart(2, '0');
+            let minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('horario').value = `${hours}:${minutes}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+version: "3.5"
+services:
+
+  pet-mgc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pet-mgc
+    restart: always
+    mem_limit: 150m
+    ports:
+      - 5000:5000
