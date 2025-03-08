@@ -1,3 +1,5 @@
 Dockerfile
 docker-compose.yaml
 README.md
+data.json
+static/grafico.png
