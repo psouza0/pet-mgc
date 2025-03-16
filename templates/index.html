@@ -133,7 +133,6 @@
             document.getElementById("data").value = today;
         }
     
-        // Define a data atual ao carregar a página
         window.onload = function() {
             setCurrentDate();
         };
@@ -165,7 +164,6 @@
                     })
                     .catch(error => console.error('Erro ao buscar dados do pet:', error));
             } else {
-                // Limpa os campos para entrada manual de um novo pet
                 document.getElementById("nome").value = "";
                 document.getElementById("tipo").value = "Cachorro";
                 document.getElementById("raça").value = "";

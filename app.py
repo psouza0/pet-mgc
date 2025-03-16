@@ -5,9 +5,7 @@ import os
 import json
 from datetime import datetime
 import matplotlib
-matplotlib.use("Agg")  # Desativa a interface gráfica
-
-
+matplotlib.use("Agg")
 
 app = Flask(__name__)
 DATA_FILE = "data.json"
@@ -44,7 +42,6 @@ def index():
             horario = request.form['horario']
             glicemia = int(request.form['glicemia'])
             
-            # Verificar se o pet já existe
             existing_pet = next((pet for pet in data if pet['Nome'] == nome), None)
             
             if existing_pet:
@@ -71,19 +68,18 @@ def index():
             save_data(data)
             return redirect(url_for('index'))
 
-    # **Correção: garantir que a página seja renderizada corretamente**
-    img_path = gerar_grafico(data)  # Chama a função para gerar o gráfico
+    img_path = gerar_grafico(data) 
     return render_template('index.html', data=data, img_path=img_path)
 
     
 def gerar_grafico(data):
-    img_path = None  # Inicializa a variável para evitar erro se não houver dados
+    img_path = None 
 
     if data:
         registros = []
         
         for pet in data:
-            for entry in pet.get('Horários', []):  # Usa .get() para evitar KeyError
+            for entry in pet.get('Horários', []):
                 registros.append({
                     "Nome": pet["Nome"],
                     "DataHora": f"{entry['Data']} {entry['Horário']}",
@@ -94,9 +90,8 @@ def gerar_grafico(data):
 
         if registros:
             df = pd.DataFrame(registros)
-            df = df.sort_values(by=["Data", "Horário"])  # Ordenação correta
+            df = df.sort_values(by=["Data", "Horário"])
 
-            # Geração do gráfico
             plt.figure(figsize=(10, 5))
             plt.plot(df["DataHora"], df["Glicemia"], marker='o', linestyle='-', color='b')
             plt.xlabel("Data e Horário")
@@ -106,14 +101,13 @@ def gerar_grafico(data):
             plt.grid(True)
             plt.tight_layout()
 
-            # Salvando o gráfico
             GRAPH_FILE = os.path.join("static", "grafico.png")
             plt.savefig(GRAPH_FILE)
-            plt.close()  # Libera memória
+            plt.close() 
             
             img_path = GRAPH_FILE + "?v=" + str(datetime.now().timestamp())
 
-    return img_path  # Retorna o caminho da imagem gerada
+    return img_path 
 
 @app.route('/get_pet/<nome>')
 def get_pet(nome):
@@ -141,7 +135,6 @@ def export_json():
 @app.route('/export_graph')
 def export_graph():
     if data:
-        # Pega o nome do primeiro pet cadastrado
         pet_name = data[0]["Nome"].replace(" ", "_") if "Nome" in data[0] else "grafico_glicemico"
     else:
         pet_name = "grafico_glicemico"
